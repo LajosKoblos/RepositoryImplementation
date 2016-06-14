@@ -41,17 +41,12 @@ public class InMemoryTokenRepository implements TokenRepository {
     }
 
     @Override
-    public void delete(String s) throws EntityNotFoundException {
+    public void delete(String tokenId) throws EntityNotFoundException {
 
     }
 
     @Override
-    public Token findOne(String s) throws EntityNotFoundException {
+    public Token findOne(String tokenId) throws EntityNotFoundException {
         return null;
-    }
-
-    @Override
-    public boolean isUserInRole(UserRole userRole) {
-        return false;
     }
 }

@@ -24,7 +24,6 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
         return null;
     }
 
-
     @Override
     public List<ContactGroup> findAll() {
         return null;
