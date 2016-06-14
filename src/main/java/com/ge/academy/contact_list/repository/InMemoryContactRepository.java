@@ -88,6 +88,16 @@ public class InMemoryContactRepository implements ContactRepository {
 
     @Override
     public List<Contact> findByContactGroupId(ContactGroupId contactGroupId) throws EntityNotFoundException {
-        return null;
+        List<Contact> matched = new ArrayList<>();
+
+        for (Contact c : contacts.values()) {
+            ContactId cId = c.getId();
+            if (cId.getUserName().equals(contactGroupId.getUserName()) &&
+                    cId.getContactGroupName().equals(contactGroupId.getContactGroupName())) {
+                matched.add(new Contact(c));
+            }
+        }
+
+        return matched;
     }
 }
