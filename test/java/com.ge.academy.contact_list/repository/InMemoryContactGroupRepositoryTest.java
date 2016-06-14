@@ -1,4 +1,4 @@
-package com.ge.academy.contact_list.test;
+package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.ContactGroup;
 import com.ge.academy.contact_list.entity.ContactGroupId;
