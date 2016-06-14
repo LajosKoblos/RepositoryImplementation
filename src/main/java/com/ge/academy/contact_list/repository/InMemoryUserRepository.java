@@ -18,6 +18,14 @@ public class InMemoryUserRepository implements UserRepository {
     private final Lock LOCK = new ReentrantLock();
     private Map<String, User> users = new HashMap<>();
 
+    public InMemoryUserRepository() {
+        users = new HashMap<>();
+    }
+
+    public InMemoryUserRepository(Map<String, User> users) {
+        this.users = users;
+    }
+
     @Override
     public User save(User user) throws EntityNotFoundException {
         User thisUser = new User(user);
@@ -30,7 +38,8 @@ public class InMemoryUserRepository implements UserRepository {
             else
                 System.out.println("User " + thisUser.getUserName() + " saved!");
 
-            return new User(users.put(thisUser.getUserName(), thisUser));
+            users.put(thisUser.getUserName(), thisUser);
+            return thisUser;
         }
 
         finally {
