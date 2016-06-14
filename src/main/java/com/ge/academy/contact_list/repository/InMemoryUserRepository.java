@@ -1,6 +1,7 @@
 package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.User;
+import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedType;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+@Repository
 public class InMemoryUserRepository implements UserRepository {
 
     private final Lock LOCK = new ReentrantLock();
