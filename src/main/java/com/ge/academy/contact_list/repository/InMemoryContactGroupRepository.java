@@ -2,9 +2,11 @@ package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.ContactGroup;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class InMemoryContactGroupRepository implements ContactGroupRepository {
     @Override
     public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException {
