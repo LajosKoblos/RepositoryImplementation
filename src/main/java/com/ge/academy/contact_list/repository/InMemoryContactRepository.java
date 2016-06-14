@@ -7,10 +7,12 @@ import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryContactRepository implements ContactRepository {
@@ -42,17 +44,26 @@ public class InMemoryContactRepository implements ContactRepository {
 
     @Override
     public void delete(ContactId contactId) throws EntityNotFoundException {
-
+        if (contacts.get(contactId) == null) {
+            throw new EntityNotFoundException(Contact.class, contactId);
+        }
+        contacts.remove(contactId);
     }
 
     @Override
     public Contact findOne(ContactId contactId) throws EntityNotFoundException {
-        return null;
+        Contact contact = contacts.get(contactId);
+        if (contact == null) {
+            throw new EntityNotFoundException(Contact.class, contactId);
+        }
+        return contact;
     }
 
     @Override
     public List<Contact> findAll() {
-        return null;
+        Contact[] contactsArray = new Contact[contacts.size()];
+        contacts.values().toArray(contactsArray);
+        return Arrays.asList(contactsArray);
     }
 
     @Override
