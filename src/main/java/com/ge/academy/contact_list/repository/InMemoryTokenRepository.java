@@ -6,23 +6,19 @@ import com.ge.academy.contact_list.exception.EntityNotFoundException;
 
 
 public class InMemoryTokenRepository implements TokenRepository {
+
     @Override
     public Token save(Token token) throws EntityNotFoundException {
         return null;
     }
 
     @Override
-    public void delete(String s) throws EntityNotFoundException {
+    public void delete(String tokenId) throws EntityNotFoundException {
 
     }
 
     @Override
-    public Token findOne(String s) throws EntityNotFoundException {
+    public Token findOne(String tokenId) throws EntityNotFoundException {
         return null;
-    }
-
-    @Override
-    public boolean isUserInRole(UserRole userRole) {
-        return false;
     }
 }

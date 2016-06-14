@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -29,29 +30,50 @@ import static org.testng.Assert.*;
 public class InMemoryContactRepositoryTest {
     ContactRepository contactRepository;
     ConcurrentMap<ContactId, Contact> mockedMap;
+    IdProvider mockedIdProvider;
 
     @BeforeMethod(alwaysRun = true)
     public void initContactRepository() {
+        mockedIdProvider = mock(IdProvider.class);
         mockedMap = mock(ConcurrentHashMap.class);
-        contactRepository = new InMemoryContactRepository(mockedMap);
+        contactRepository = new InMemoryContactRepository(mockedIdProvider, mockedMap);
     }
 
     @Test
-    public void saveNewContact() {
+    public void saveShouldPutTheContactIntoTheMap() {
         //Given
         ContactId contactId = new ContactId("user1", "group1");
         Contact contact = new Contact(contactId, null, null, null, null, null, null);
 
-        when(mockedMap.put(anyObject(), anyObject())).then(AdditionalAnswers.returnsLastArg());
-
-        long expected = 1L;
-
         //When
-        long result = contactRepository.save(contact).getId().getContactId();
+        Contact result = contactRepository.save(contact);
 
         //Then
-        assertEquals(result, expected);
+        verify(mockedMap).put(contactId, contact);
     }
+
+    @Test
+    public void saveShouldPutTheNewContactWithAGeneratedIdIntoMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 0);// contactId.id = 0 means create
+
+        Contact contact = new Contact(contactId, "a", "b", "c", "d", "e", "f");
+        long mockedNewId = 2345L;
+        ContactId expectedNewId = new ContactId("user1", "group1", mockedNewId);
+        Contact expectedCreatedContact = new Contact(expectedNewId, "a", "b", "c", "d", "e", "f");
+
+        when(mockedIdProvider.getNewId())
+                .thenReturn(mockedNewId);
+
+        //When
+        Contact result = contactRepository.save(contact);
+
+        //Then
+        //verify(mockedIdProvider).getNewId();
+
+        verify(mockedMap).put(expectedNewId, expectedCreatedContact);
+    }
+
 
     @Test
     public void saveExistingContact() {
@@ -71,17 +93,28 @@ public class InMemoryContactRepositoryTest {
         assertEquals(result, expected);
     }
 
-    @Test(expectedExceptions = {EntityNotFoundException.class})
-    public void saveNonExistingContact() {
+    @Test
+    public void saveShouldThrowEntityNotFoundExceptionWhenContactDoesNotExistInMap() {
         //Given
         ContactId newContactId = new ContactId("user1", "group1", 1L);
         Contact newContact = new Contact(newContactId, null, null, null, null, null, null);
 
         when(mockedMap.get(anyObject())).thenReturn(null);
+        when(mockedMap.containsKey(anyObject())).thenReturn(false);
 
         //When
-        contactRepository.save(newContact);
+        boolean wasExpectedException = false;
 
         //Then
+        try {
+            contactRepository.save(newContact);
+            fail("Should throw EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            wasExpectedException = true;
+            assertEquals(Contact.class, ex.getEntityType());
+        }
+
+        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+
     }
 }

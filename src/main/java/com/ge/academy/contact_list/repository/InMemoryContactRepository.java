@@ -14,14 +14,16 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class InMemoryContactRepository implements ContactRepository {
-    private AtomicLong counter = new AtomicLong(0);
+    private IdProvider idProvider;
     private ConcurrentMap<ContactId, Contact> contacts;
 
     public InMemoryContactRepository() {
+        this.idProvider = new AtomicLongIdProvider();
         this.contacts = new ConcurrentHashMap<ContactId, Contact>();
     }
 
-    public InMemoryContactRepository(ConcurrentMap<ContactId, Contact> contacts) {
+    public InMemoryContactRepository(IdProvider idProvider, ConcurrentMap<ContactId, Contact> contacts) {
+        this.idProvider = idProvider;
         this.contacts = contacts;
     }
 
@@ -30,11 +32,12 @@ public class InMemoryContactRepository implements ContactRepository {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
         if (managedId.getContactId() == 0L) {
-            managedId.setContactId(counter.incrementAndGet());
+            managedId.setContactId(idProvider.getNewId());
         } else if (contacts.get(managedId) == null) {
             throw new EntityNotFoundException(Contact.class, managed.getId());
         }
-        return new Contact(contacts.put(managedId, managed));
+        contacts.put(managedId, managed);
+        return new Contact(managed);
     }
 
     @Override
@@ -53,7 +56,7 @@ public class InMemoryContactRepository implements ContactRepository {
     }
 
     @Override
-    public Contact findByExample(Contact contact) throws EntityNotFoundException {
+    public List<Contact> findByExample(Contact contact) throws EntityNotFoundException {
         return null;
     }
 
