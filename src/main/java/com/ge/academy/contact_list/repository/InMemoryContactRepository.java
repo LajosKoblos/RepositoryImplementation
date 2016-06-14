@@ -7,6 +7,7 @@ import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,7 +69,21 @@ public class InMemoryContactRepository implements ContactRepository {
 
     @Override
     public List<Contact> findByExample(Contact contact) throws EntityNotFoundException {
-        return null;
+        List<Contact> matched = new ArrayList<>();
+
+        for (Contact c : contacts.values()) {
+            if (c.getId().getUserName().equals(contact.getId().getUserName()) &&
+                    c.getFirstName() != null && c.getFirstName().toLowerCase().contains(contact.getFirstName().toLowerCase()) &&
+                    c.getHomeEmail() != null && c.getHomeEmail().toLowerCase().contains(contact.getHomeEmail().toLowerCase()) &&
+                    c.getJobTitle() != null && c.getJobTitle().toLowerCase().contains(contact.getHomeEmail().toLowerCase()) &&
+                    c.getLastName() != null && c.getLastName().toLowerCase().contains(contact.getLastName().toLowerCase()) &&
+                    c.getNickName() != null && c.getNickName().toLowerCase().contains(contact.getNickName().toLowerCase()) &&
+                    c.getWorkEmail() != null && c.getWorkEmail().toLowerCase().contains(contact.getWorkEmail().toLowerCase())) {
+                matched.add(new Contact(c));
+            }
+        }
+
+        return matched;
     }
 
     @Override
