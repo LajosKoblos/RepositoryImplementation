@@ -1,14 +1,29 @@
 package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.Contact;
+import com.ge.academy.contact_list.entity.ContactId;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class InMemoryContactRepository implements ContactRepository {
+    private AtomicLong counter = new AtomicLong(0);
+    private ConcurrentMap<ContactId, Contact> contacts = new ConcurrentHashMap<>();
+
     @Override
     public Contact save(Contact contact) throws EntityNotFoundException {
-        return null;
+        Contact managed = new Contact(contact);
+        ContactId managedId = managed.getId();
+        if (managedId.getContactId() == 0) {
+            managedId.setContactId(counter.incrementAndGet());
+        } else if (contacts.get(managedId) == null) {
+            throw new EntityNotFoundException(Contact.class, managed.getId());
+        }
+        return new Contact(contacts.put(managedId, managed));
     }
 
     @Override
