@@ -1,6 +1,7 @@
 package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.User;
+import com.ge.academy.contact_list.entity.UserRole;
 import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 
@@ -16,13 +17,20 @@ public class InMemoryUserRepository implements UserRepository {
 
     private final Lock LOCK = new ReentrantLock();
     private Map<String, User> users = new HashMap<>();
+    {
+        seed();
+    }
 
     public InMemoryUserRepository() {
-        users = new HashMap<>();
+        this(new HashMap<>());
     }
 
     public InMemoryUserRepository(Map<String, User> users) {
         this.users = users;
+    }
+
+    private void seed() {
+        users.put("Admin", new User("Admin", "Alma1234", UserRole.ADMIN));
     }
 
     @Override
