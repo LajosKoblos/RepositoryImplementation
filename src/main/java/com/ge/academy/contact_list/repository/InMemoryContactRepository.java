@@ -34,7 +34,7 @@ public class InMemoryContactRepository implements ContactRepository {
     public Contact save(Contact contact) throws EntityNotFoundException {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
-        if (managedId.getContactId() == 0L) {
+        if (managedId.getContactId() == 0L) { // this means a create operation
             managedId.setContactId(idProvider.getNewId());
         } else if (contacts.get(managedId) == null) {
             throw new EntityNotFoundException(Contact.class, managed.getId());
