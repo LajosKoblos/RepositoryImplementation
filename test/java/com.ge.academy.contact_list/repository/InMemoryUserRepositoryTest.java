@@ -203,6 +203,25 @@ public class InMemoryUserRepositoryTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenUserRoleIsNull() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User("Valaki", "12345", null);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void deleteShouldThrowIllegalArgumentExceptionWhenParameterIsEmpty() {
         //Given data set in setUp() method
 

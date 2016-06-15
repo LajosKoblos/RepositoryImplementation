@@ -44,6 +44,12 @@ public class InMemoryUserRepository implements UserRepository {
             if (thisUser.getPassword() == null || thisUser.getPassword().isEmpty()){
                 throw new IllegalArgumentException("Password missing!");
             }
+
+            if (thisUser.getRole() == null || thisUser.getRole().toString().isEmpty()){
+                throw new IllegalArgumentException("User role missing!");
+            }
+
+
 //      Can be a User update
             if (users.containsKey(thisUser.getUserName()))
                 System.out.println("User " + thisUser.getUserName() + " updated!");
