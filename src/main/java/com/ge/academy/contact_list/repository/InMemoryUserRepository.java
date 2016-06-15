@@ -17,9 +17,6 @@ public class InMemoryUserRepository implements UserRepository {
 
     private final Lock LOCK = new ReentrantLock();
     private Map<String, User> users = new HashMap<>();
-    {
-        seed();
-    }
 
     public InMemoryUserRepository() {
         this(new HashMap<>());
@@ -27,6 +24,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     public InMemoryUserRepository(Map<String, User> users) {
         this.users = users;
+        seed();
     }
 
     private void seed() {
