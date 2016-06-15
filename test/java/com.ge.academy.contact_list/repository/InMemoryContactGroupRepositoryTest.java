@@ -39,11 +39,12 @@ public class InMemoryContactGroupRepositoryTest {
     public void deleteShouldRemoveContactGroupFromMap() {
 
         // Given
-        ContactGroupId oldCcontactGroupId = new ContactGroupId("userName", "Group_Id");
-        ContactGroup oldContactGroup = new ContactGroup("oldGroupName",oldCcontactGroupId);
-        when(contactGroups.remove(testContactGroup)).thenReturn(oldContactGroup);
+        ContactGroupId oldContactGroupId = new ContactGroupId("userName", "Group_Id");
+        ContactGroup oldContactGroup = new ContactGroup("oldGroupName",oldContactGroupId);
+
+        when(contactGroups.remove(testContactGroupId)).thenReturn(oldContactGroup);
         when(contactGroups.containsKey(testContactGroup)).thenReturn(true);
-        when(contactGroups.get(testContactGroup)).thenReturn(oldContactGroup);
+        when(contactGroups.get(testContactGroupId)).thenReturn(oldContactGroup);
 
         inMemoryContactGroupRepository = new InMemoryContactGroupRepository(contactGroups);
 
