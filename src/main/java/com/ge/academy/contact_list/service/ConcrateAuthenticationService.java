@@ -10,12 +10,15 @@ import com.ge.academy.contact_list.repository.InMemoryUserRepository;
 import com.ge.academy.contact_list.repository.TokenRepository;
 import com.ge.academy.contact_list.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 /**
  * Created by 212566307 on 6/14/2016.
  */
+@Service
 public class ConcrateAuthenticationService implements AuthenticationService {
 
     @Autowired
