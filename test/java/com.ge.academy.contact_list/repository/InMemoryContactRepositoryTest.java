@@ -74,23 +74,19 @@ public class InMemoryContactRepositoryTest {
         verify(mockedMap).put(expectedNewId, expectedCreatedContact);
     }
 
-
     @Test
-    public void saveExistingContact() {
+    public void saveShouldPutTheContactWithoutAGeneratedIdIntoMapWhenContactDoesExistInMap() {
         //Given
-        ContactId newContactId = new ContactId("user1", "group1");
-        Contact newContact = new Contact(newContactId, null, null, null, null, null, null);
+        ContactId contactId = new ContactId("user1", "group1", 1);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
 
-        when(mockedMap.put(anyObject(), anyObject())).then(AdditionalAnswers.returnsLastArg());
-        when(mockedMap.get(anyObject())).then(returnsFirstArg());
-
-        Contact expected = contactRepository.save(newContact);
+        when(mockedMap.get(contactId)).thenReturn(contact);
 
         //When
-        Contact result = contactRepository.save(expected);
+        contactRepository.save(contact);
 
         //Then
-        assertEquals(result, expected);
+        verify(mockedMap).put(contactId, contact);
     }
 
     @Test
@@ -115,6 +111,83 @@ public class InMemoryContactRepositoryTest {
         }
 
         assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
 
+    @Test
+    public void deleteShouldRemoveTheContactFromMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(contactId)).thenReturn(contact);
+
+        //When
+        contactRepository.delete(contactId);
+
+        //Then
+        verify(mockedMap).remove(contactId);
+    }
+
+    @Test
+    public void deleteShouldThrowEntityNotFoundExceptionWhenContactDoesNotExistInMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(anyObject())).thenReturn(null);
+        when(mockedMap.containsKey(anyObject())).thenReturn(false);
+
+        //When
+        boolean wasExpectedException = false;
+
+        //Then
+        try {
+            contactRepository.delete(contactId);
+            fail("Should throw EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            wasExpectedException = true;
+            assertEquals(Contact.class, ex.getEntityType());
+        }
+
+        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
+
+    @Test
+    public void findOneShouldGetTheContactWithTheSameContactIdFromMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(contactId)).thenReturn(contact);
+
+        //When
+        Contact expected = contactRepository.findOne(contactId);
+
+        //Then
+        assertEquals(contact, expected);
+    }
+
+    @Test
+    public void findOneShouldThrowEntityNotFoundExceptionWhenContactDoesNotExistInMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(anyObject())).thenReturn(null);
+        when(mockedMap.containsKey(anyObject())).thenReturn(false);
+
+        //When
+        boolean wasExpectedException = false;
+
+        //Then
+        try {
+            contactRepository.findOne(contactId);
+            fail("Should throw EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            wasExpectedException = true;
+            assertEquals(Contact.class, ex.getEntityType());
+        }
+
+        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
     }
 }

@@ -57,7 +57,7 @@ public class InMemoryContactRepository implements ContactRepository {
         if (contact == null) {
             throw new EntityNotFoundException(Contact.class, contactId);
         }
-        return contact;
+        return new Contact(contact);
     }
 
     @Override
