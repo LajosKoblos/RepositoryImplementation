@@ -1,5 +1,4 @@
 package com.ge.academy.contact_list.repository;
-
 import com.ge.academy.contact_list.entity.User;
 import com.ge.academy.contact_list.entity.UserRole;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;

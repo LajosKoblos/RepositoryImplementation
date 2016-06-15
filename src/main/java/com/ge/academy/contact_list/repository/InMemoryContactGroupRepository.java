@@ -26,7 +26,7 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
     }
 
     @Override
-    public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException {
+    public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException, IllegalArgumentException {
 
         if (contactGroup.getId() == null){
             throw new IllegalArgumentException("contactgroupId is null");

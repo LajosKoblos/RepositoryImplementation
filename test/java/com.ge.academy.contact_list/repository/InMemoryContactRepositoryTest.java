@@ -10,22 +10,20 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.Any;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-import org.testng.internal.annotations.ExpectedExceptionsAnnotation;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static org.junit.Assert.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 /**
  * Created by 212564370 on 6/13/2016.
@@ -35,7 +33,7 @@ public class InMemoryContactRepositoryTest {
     ConcurrentMap<ContactId, Contact> mockedMap;
     IdProvider mockedIdProvider;
 
-    @BeforeMethod(alwaysRun = true)
+    @Before
     public void initContactRepository() {
         mockedIdProvider = mock(IdProvider.class);
         mockedMap = mock(ConcurrentHashMap.class);
@@ -114,7 +112,7 @@ public class InMemoryContactRepositoryTest {
             assertEquals(Contact.class, ex.getEntityType());
         }
 
-        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+        assertTrue("Should throw EntityNotFoundException", wasExpectedException);
     }
 
     @Test
@@ -153,7 +151,7 @@ public class InMemoryContactRepositoryTest {
             assertEquals(Contact.class, ex.getEntityType());
         }
 
-        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+        assertTrue("Should throw EntityNotFoundException", wasExpectedException);
     }
 
     @Test
@@ -192,7 +190,7 @@ public class InMemoryContactRepositoryTest {
             assertEquals(Contact.class, ex.getEntityType());
         }
 
-        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+        assertTrue("Should throw EntityNotFoundException", wasExpectedException);
     }
 
     @Test
