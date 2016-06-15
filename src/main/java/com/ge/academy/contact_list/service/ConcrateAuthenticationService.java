@@ -29,7 +29,7 @@ public class ConcrateAuthenticationService implements AuthenticationService {
     @Override
     public Token findTokenById(String tokenId) throws TokenExpiredException {
         Token t = inMemoryTokenRepository.findOne(tokenId);
-        if (t.getExpiresOn().isAfter(LocalDateTime.now())) {
+        if (t.getExpiresOn().isBefore(LocalDateTime.now())) {
             throw new TokenExpiredException();
         } else {
             return t;
@@ -44,8 +44,7 @@ public class ConcrateAuthenticationService implements AuthenticationService {
                 throw new AuthenticationFailedException();
             }else{
                 Token t = new Token(null,user,user.getRole(),LocalDateTime.now().plusHours(2));
-                inMemoryTokenRepository.save(t);
-                return t;
+                return inMemoryTokenRepository.save(t);
             }
         } catch (EntityNotFoundException e) {
             throw new AuthenticationFailedException();

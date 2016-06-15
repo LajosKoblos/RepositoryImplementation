@@ -61,10 +61,8 @@ public class InMemoryContactRepositoryTest {
         ContactId contactId = new ContactId("user1", "group1", 0);// contactId.id = 0 means create
 
         Contact contact = new Contact(contactId, "a", "b", "c", "d", "e", "f");
-        long mockedNewId = 2345L;
-        ContactId expectedNewId = new ContactId("user1", "group1", mockedNewId);
-        Contact expectedCreatedContact = new Contact(expectedNewId, "a", "b", "c", "d", "e", "f");
 
+        long mockedNewId = 2345L;
         when(mockedIdProvider.getNewId())
                 .thenReturn(mockedNewId);
 
@@ -72,8 +70,11 @@ public class InMemoryContactRepositoryTest {
         Contact result = contactRepository.save(contact);
 
         //Then
-        //verify(mockedIdProvider).getNewId();
 
+        ContactId expectedNewId = new ContactId("user1", "group1", mockedNewId);
+        Contact expectedCreatedContact = new Contact(expectedNewId, "a", "b", "c", "d", "e", "f");
+
+        assertEquals(0, contactId.getContactId());
         verify(mockedMap).put(expectedNewId, expectedCreatedContact);
     }
 
