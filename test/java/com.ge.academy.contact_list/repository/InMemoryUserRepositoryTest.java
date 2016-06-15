@@ -136,9 +136,6 @@ public class InMemoryUserRepositoryTest {
 
         userMap = mock(HashMap.class);
 
-        User origUser = new User("user3", "pipacs", UserRole.ADMIN);
-        User newUser = new User("user3", "1234568", UserRole.USER);
-
         when(userMap.remove("admin"))
                 .thenReturn(admin);
 
