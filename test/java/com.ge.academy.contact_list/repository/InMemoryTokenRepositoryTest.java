@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
+
 
 
 /**
