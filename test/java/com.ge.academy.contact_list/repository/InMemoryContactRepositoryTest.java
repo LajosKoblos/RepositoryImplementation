@@ -1,6 +1,7 @@
 package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.Contact;
+import com.ge.academy.contact_list.entity.ContactGroupId;
 import com.ge.academy.contact_list.entity.ContactId;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.mockito.AdditionalAnswers;
@@ -242,6 +243,56 @@ public class InMemoryContactRepositoryTest {
 
         //When
         List<Contact> resultList = contactRepository.findByExample(example);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByContactGroupIdShouldFindTwoContactsWhenTwoContactsInTheGivenGroup() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group2", 3), "3abc", "3bcd", "3cde", "3def", "3efg", "3fgh"));
+        contacts.add(new Contact(new ContactId("user2", "group1", 4), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        ContactGroupId contactGroupId = new ContactGroupId("user1", "group1");
+
+        int expected = 2;
+
+        //When
+        List<Contact> resultList = contactRepository.findByContactGroupId(contactGroupId);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByContactGroupIdShouldFindNothingWhenThereIsNoContactForTheGivenContactGroup() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group2", 3), "3abc", "3bcd", "3cde", "3def", "3efg", "3fgh"));
+        contacts.add(new Contact(new ContactId("user2", "group1", 4), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        ContactGroupId contactGroupId = new ContactGroupId("user1", "group3");
+
+        int expected = 0;
+
+        //When
+        List<Contact> resultList = contactRepository.findByContactGroupId(contactGroupId);
         int result = resultList.size();
 
         //Then
