@@ -14,6 +14,8 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.internal.annotations.ExpectedExceptionsAnnotation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -189,5 +191,60 @@ public class InMemoryContactRepositoryTest {
         }
 
         assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
+
+    @Test
+    public void findAllShouldReturnTheListOfContacts() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        //When
+        List<Contact> expected = contactRepository.findAll();
+
+        //Then
+        assertEquals(contacts, expected);
+    }
+
+    @Test
+    public void findByExampleShouldFindOneContactWhenJustOneContactMatch() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        int expected = 1;
+
+        //When
+        List<Contact> resultList = contactRepository.findByExample(example);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByExampleShouldFindNothingWhenThereIsNoContactForThisUser() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user2", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        int expected = 0;
+
+        //When
+        List<Contact> resultList = contactRepository.findByExample(example);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
     }
 }

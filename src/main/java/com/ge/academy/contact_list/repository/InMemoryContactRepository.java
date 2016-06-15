@@ -34,6 +34,14 @@ public class InMemoryContactRepository implements ContactRepository {
     public Contact save(Contact contact) throws EntityNotFoundException {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
+
+        if (managedId.getContactGroupName().isEmpty()) {
+            throw new IllegalArgumentException("contactGroupName is empty in ContactId");
+        }
+        if (managedId.getUserName().isEmpty()) {
+            throw new IllegalArgumentException("userName is empty in ContactId");
+        }
+
         if (managedId.getContactId() == 0L) {
             managedId.setContactId(idProvider.getNewId());
         } else if (contacts.get(managedId) == null) {
@@ -72,13 +80,15 @@ public class InMemoryContactRepository implements ContactRepository {
         List<Contact> matched = new ArrayList<>();
 
         for (Contact c : contacts.values()) {
-            if (c.getId().getUserName().equals(contact.getId().getUserName()) &&
-                    c.getFirstName() != null && c.getFirstName().toLowerCase().contains(contact.getFirstName().toLowerCase()) &&
-                    c.getHomeEmail() != null && c.getHomeEmail().toLowerCase().contains(contact.getHomeEmail().toLowerCase()) &&
-                    c.getJobTitle() != null && c.getJobTitle().toLowerCase().contains(contact.getHomeEmail().toLowerCase()) &&
-                    c.getLastName() != null && c.getLastName().toLowerCase().contains(contact.getLastName().toLowerCase()) &&
-                    c.getNickName() != null && c.getNickName().toLowerCase().contains(contact.getNickName().toLowerCase()) &&
-                    c.getWorkEmail() != null && c.getWorkEmail().toLowerCase().contains(contact.getWorkEmail().toLowerCase())) {
+            if (!c.getId().getUserName().equals(contact.getId().getUserName())) {
+                continue;
+            }
+            if ((c.getFirstName() != null && c.getFirstName().toLowerCase().contains(contact.getFirstName().toLowerCase())) ||
+                    (c.getHomeEmail() != null && c.getHomeEmail().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
+                    (c.getJobTitle() != null && c.getJobTitle().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
+                    (c.getLastName() != null && c.getLastName().toLowerCase().contains(contact.getLastName().toLowerCase())) ||
+                    (c.getNickName() != null && c.getNickName().toLowerCase().contains(contact.getNickName().toLowerCase())) ||
+                    (c.getWorkEmail() != null && c.getWorkEmail().toLowerCase().contains(contact.getWorkEmail().toLowerCase()))) {
                 matched.add(new Contact(c));
             }
         }
