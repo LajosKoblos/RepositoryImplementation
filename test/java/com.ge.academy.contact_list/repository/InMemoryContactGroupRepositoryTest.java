@@ -4,10 +4,14 @@ import com.ge.academy.contact_list.entity.ContactGroup;
 import com.ge.academy.contact_list.entity.ContactGroupId;
 import com.ge.academy.contact_list.repository.ContactGroupRepository;
 import com.ge.academy.contact_list.repository.InMemoryContactGroupRepository;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
@@ -17,56 +21,80 @@ import static org.testng.Assert.*;
  */
 public class InMemoryContactGroupRepositoryTest {
 
-    private List<ContactGroup> contactGroups;
-    private List<ContactGroup> spiedContactGroups;
     private ContactGroup testContactGroup;
     private ContactGroupId testContactGroupId;
     private InMemoryContactGroupRepository inMemoryContactGroupRepository;
+    private Map<ContactGroupId, ContactGroup> contactGroups;
 
-    @org.testng.annotations.BeforeMethod
-    public void setUp() throws Exception {
+    @Before
+    public void setUp() {
 
-        contactGroups = new ArrayList<>();
-        spiedContactGroups = spy(contactGroups);
+        contactGroups = mock(Map.class);
         testContactGroupId = new ContactGroupId("Test_User", "Test_Group_Id");
         testContactGroup = new ContactGroup("Test_Group", testContactGroupId);
-        inMemoryContactGroupRepository = new InMemoryContactGroupRepository();
+        inMemoryContactGroupRepository = new InMemoryContactGroupRepository(contactGroups);
     }
 
-    @org.testng.annotations.AfterMethod
-    public void tearDown() throws Exception {
-
-    }
-
-    @org.testng.annotations.Test
-    public void testSave() throws Exception {
-        System.out.println("test_Saave");
+    @Test
+    public void saveShouldPutTheGivenContactGroupIntoMapWithItsIdAsTheKey() {
         // Given
         // When
-//        inMemoryContactGroupRepository.save(testContactGroup);
+        inMemoryContactGroupRepository.save(testContactGroup);
         // Then
-//        verify(spiedContactGroups).add(testContactGroup);
+        verify(contactGroups).put(testContactGroupId, testContactGroup);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionIfGroupNameIsNotProvided() {
+        // Given
+        ContactGroupId testContactGroupId = new ContactGroupId("testUser", null);
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", testContactGroupId);
+        // When
+        inMemoryContactGroupRepository.save(testContactGroup);
+        // Then
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionIfGroupNameIsEmptyString() {
+        // Given
+        ContactGroupId testContactGroupId = new ContactGroupId("testUser", new String(""));
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", testContactGroupId);
+        // When
+        inMemoryContactGroupRepository.save(testContactGroup);
+        // Then
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionIfIdIsNull() {
+        // Given
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", null);
+        // When
+        inMemoryContactGroupRepository.save(testContactGroup);
+        // Then
 
     }
 
-    @org.testng.annotations.Test
-    public void testDelete() throws Exception {
-
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionIfIdUserNameIsNull() {
+        // Given
+        ContactGroupId groupIdWithNullUserName = new ContactGroupId(null, "x");
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", groupIdWithNullUserName);
+        // When
+        inMemoryContactGroupRepository.save(testContactGroup);
+        // Then
     }
 
-    @org.testng.annotations.Test
-    public void testFindOne() throws Exception {
-
-    }
-
-    @org.testng.annotations.Test
-    public void testFindAll() throws Exception {
-
-    }
-
-    @org.testng.annotations.Test
-    public void testFindByOwner() throws Exception {
-
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionIfIdUserNameIsEmptyString() {
+        // Given
+        ContactGroupId groupIdWithNullUserName = new ContactGroupId(new String(""), "x");
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", groupIdWithNullUserName);
+        // When
+        inMemoryContactGroupRepository.save(testContactGroup);
+        // Then
     }
 
 }
+
+
+
