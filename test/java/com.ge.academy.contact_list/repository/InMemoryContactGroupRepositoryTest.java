@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
@@ -33,6 +31,25 @@ public class InMemoryContactGroupRepositoryTest {
         testContactGroupId = new ContactGroupId("Test_User", "Test_Group_Id");
         testContactGroup = new ContactGroup("Test_Group", testContactGroupId);
         inMemoryContactGroupRepository = new InMemoryContactGroupRepository(contactGroups);
+    }
+
+    @Test
+    public void deleteShouldRemoveContactGroupFromMap() {
+
+        // Given
+        ContactGroupId oldCcontactGroupId = new ContactGroupId("userName", "Group_Id");
+        ContactGroup oldContactGroup = new ContactGroup("oldGroupName",oldCcontactGroupId);
+        when(contactGroups.remove(testContactGroup)).thenReturn(oldContactGroup);
+        when(contactGroups.containsKey(testContactGroup)).thenReturn(true);
+        when(contactGroups.get(testContactGroup)).thenReturn(oldContactGroup);
+
+        inMemoryContactGroupRepository = new InMemoryContactGroupRepository(contactGroups);
+
+        // When
+        inMemoryContactGroupRepository.delete(testContactGroupId);
+        // Then
+        verify(contactGroups).remove(testContactGroupId);
+
     }
 
     @Test
@@ -84,11 +101,12 @@ public class InMemoryContactGroupRepositoryTest {
         // Then
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)//but NULLPOINTER Exception thrown
     public void saveShouldThrowIllegalArgumentExceptionIfIdUserNameIsEmptyString() {
         // Given
-        ContactGroupId groupIdWithNullUserName = new ContactGroupId(new String(""), "x");
-        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", groupIdWithNullUserName);
+        ContactGroupId groupIdWithEmptyUserName = new ContactGroupId(new String(""), "x");
+        //ContactGroupId groupIdWithEmptyUserName = new ContactGroupId("useASDasd", "x");
+        ContactGroup testContactGroup = new ContactGroup("testcontactgroupname", groupIdWithEmptyUserName);
         // When
         inMemoryContactGroupRepository.save(testContactGroup);
         // Then
