@@ -1,4 +1,5 @@
 package com.ge.academy.contact_list.repository;
+
 import com.ge.academy.contact_list.entity.User;
 import com.ge.academy.contact_list.entity.UserRole;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
@@ -8,9 +9,7 @@ import org.mockito.Mockito;
 
 import java.util.*;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,6 +33,7 @@ public class InMemoryUserRepositoryTest {
         admin = new User("admin", "password", UserRole.ADMIN);
         user1 = new User("user1", "123456", UserRole.USER);
         user2 = new User("user2", "1234567", UserRole.USER);
+        userMap = mock(HashMap.class);
         userMap = new HashMap<>();
 
         inMemoryUserRepository = new InMemoryUserRepository(userMap);
@@ -44,7 +44,7 @@ public class InMemoryUserRepositoryTest {
     public void findAllShouldReturnAllElementsOfInternalMap() {
         //Given data set in setUp() method
 
-
+        userMap = mock(HashMap.class);
 
         List<User>returnedCollection = Arrays.asList(admin, user1, user2);
 
@@ -274,8 +274,15 @@ public class InMemoryUserRepositoryTest {
     public void deleteShouldRemoveUserFromMap() {
         //Given data set in setUp() method
 
+        User origUser = new User("user3", "pipacs", UserRole.ADMIN);
+        User newUser = new User("user3", "1234568", UserRole.USER);
+
         when(userMap.remove("admin"))
-                .thenReturn(admin);
+                .thenReturn(origUser);
+        when(userMap.containsKey("admin"))
+                .thenReturn(true);
+        when(userMap.get("admin"))
+                .thenReturn(origUser);
 
         inMemoryUserRepository = new InMemoryUserRepository(userMap);
 
@@ -286,21 +293,24 @@ public class InMemoryUserRepositoryTest {
         verify(userMap).remove("admin");
     }
 
-    @Test(expected = EntityNotFoundException.class)
+    @Test
     public void deleteShouldThrowEntityNotFoundExceptionWhenEntityIsNotInMap() {
         //Given
 
+        when(userMap.containsKey("admin")).thenReturn(false);
+        when(userMap.get("admin")).thenReturn(null);
+        when(userMap.remove("admin")).thenReturn(null);
+
+        inMemoryUserRepository = new InMemoryUserRepository(userMap);
         try {
-            when(userMap.remove("admin")).thenReturn(null);
-
-            inMemoryUserRepository = new InMemoryUserRepository(userMap);
-
             //When
+
             inMemoryUserRepository.delete("admin");
 
-            //Then
-        } finally {
-            verify(userMap).remove("admin");
+            fail("Delete should throw an EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            assertEquals(User.class, ex.getEntityType());
+            assertEquals("admin", ex.getEntityId());
         }
     }
 

@@ -1,6 +1,7 @@
 package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.Contact;
+import com.ge.academy.contact_list.entity.ContactGroupId;
 import com.ge.academy.contact_list.entity.ContactId;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.mockito.AdditionalAnswers;
@@ -14,6 +15,8 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.internal.annotations.ExpectedExceptionsAnnotation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -58,10 +61,8 @@ public class InMemoryContactRepositoryTest {
         ContactId contactId = new ContactId("user1", "group1", 0);// contactId.id = 0 means create
 
         Contact contact = new Contact(contactId, "a", "b", "c", "d", "e", "f");
-        long mockedNewId = 2345L;
-        ContactId expectedNewId = new ContactId("user1", "group1", mockedNewId);
-        Contact expectedCreatedContact = new Contact(expectedNewId, "a", "b", "c", "d", "e", "f");
 
+        long mockedNewId = 2345L;
         when(mockedIdProvider.getNewId())
                 .thenReturn(mockedNewId);
 
@@ -69,28 +70,27 @@ public class InMemoryContactRepositoryTest {
         Contact result = contactRepository.save(contact);
 
         //Then
-        //verify(mockedIdProvider).getNewId();
 
+        ContactId expectedNewId = new ContactId("user1", "group1", mockedNewId);
+        Contact expectedCreatedContact = new Contact(expectedNewId, "a", "b", "c", "d", "e", "f");
+
+        assertEquals(0, contactId.getContactId());
         verify(mockedMap).put(expectedNewId, expectedCreatedContact);
     }
 
-
     @Test
-    public void saveExistingContact() {
+    public void saveShouldPutTheContactWithoutAGeneratedIdIntoMapWhenContactDoesExistInMap() {
         //Given
-        ContactId newContactId = new ContactId("user1", "group1");
-        Contact newContact = new Contact(newContactId, null, null, null, null, null, null);
+        ContactId contactId = new ContactId("user1", "group1", 1);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
 
-        when(mockedMap.put(anyObject(), anyObject())).then(AdditionalAnswers.returnsLastArg());
-        when(mockedMap.get(anyObject())).then(returnsFirstArg());
-
-        Contact expected = contactRepository.save(newContact);
+        when(mockedMap.get(contactId)).thenReturn(contact);
 
         //When
-        Contact result = contactRepository.save(expected);
+        contactRepository.save(contact);
 
         //Then
-        assertEquals(result, expected);
+        verify(mockedMap).put(contactId, contact);
     }
 
     @Test
@@ -115,6 +115,210 @@ public class InMemoryContactRepositoryTest {
         }
 
         assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
 
+    @Test
+    public void deleteShouldRemoveTheContactFromMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(contactId)).thenReturn(contact);
+
+        //When
+        contactRepository.delete(contactId);
+
+        //Then
+        verify(mockedMap).remove(contactId);
+    }
+
+    @Test
+    public void deleteShouldThrowEntityNotFoundExceptionWhenContactDoesNotExistInMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(anyObject())).thenReturn(null);
+        when(mockedMap.containsKey(anyObject())).thenReturn(false);
+
+        //When
+        boolean wasExpectedException = false;
+
+        //Then
+        try {
+            contactRepository.delete(contactId);
+            fail("Should throw EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            wasExpectedException = true;
+            assertEquals(Contact.class, ex.getEntityType());
+        }
+
+        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
+
+    @Test
+    public void findOneShouldGetTheContactWithTheSameContactIdFromMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(contactId)).thenReturn(contact);
+
+        //When
+        Contact expected = contactRepository.findOne(contactId);
+
+        //Then
+        assertEquals(contact, expected);
+    }
+
+    @Test
+    public void findOneShouldThrowEntityNotFoundExceptionWhenContactDoesNotExistInMap() {
+        //Given
+        ContactId contactId = new ContactId("user1", "group1", 1L);
+        Contact contact = new Contact(contactId, null, null, null, null, null, null);
+
+        when(mockedMap.get(anyObject())).thenReturn(null);
+        when(mockedMap.containsKey(anyObject())).thenReturn(false);
+
+        //When
+        boolean wasExpectedException = false;
+
+        //Then
+        try {
+            contactRepository.findOne(contactId);
+            fail("Should throw EntityNotFoundException");
+        } catch (EntityNotFoundException ex) {
+            wasExpectedException = true;
+            assertEquals(Contact.class, ex.getEntityType());
+        }
+
+        assertTrue(wasExpectedException, "Should throw EntityNotFoundException");
+    }
+
+    @Test
+    public void findAllShouldReturnTwoContactsWhenTwoContactInTheRepository() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+
+        when(mockedMap.size()).thenReturn(contacts.size());
+        when(mockedMap.values()).thenReturn(contacts);
+
+        //When
+        List<Contact> result = contactRepository.findAll();
+
+        //Then
+        assertEquals(contacts, result);
+    }
+
+    @Test
+    public void findAllShouldReturnWithDifferentReferenceOfTheContacts() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        when(mockedMap.size()).thenReturn(contacts.size());
+        when(mockedMap.values()).thenReturn(contacts);
+
+        Contact expected = contacts.get(0);
+
+        //When
+        List<Contact> resultList = contactRepository.findAll();
+        Contact result = resultList.get(0);
+
+        //Then
+        assertNotSame(expected, result);
+    }
+
+    @Test
+    public void findByExampleShouldFindOneContactWhenJustOneContactMatch() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        int expected = 1;
+
+        //When
+        List<Contact> resultList = contactRepository.findByExample(example);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByExampleShouldFindNothingWhenThereIsNoContactForThisUser() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user2", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        int expected = 0;
+
+        //When
+        List<Contact> resultList = contactRepository.findByExample(example);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByContactGroupIdShouldFindTwoContactsWhenTwoContactsInTheGivenGroup() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group2", 3), "3abc", "3bcd", "3cde", "3def", "3efg", "3fgh"));
+        contacts.add(new Contact(new ContactId("user2", "group1", 4), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        ContactGroupId contactGroupId = new ContactGroupId("user1", "group1");
+
+        int expected = 2;
+
+        //When
+        List<Contact> resultList = contactRepository.findByContactGroupId(contactGroupId);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void findByContactGroupIdShouldFindNothingWhenThereIsNoContactForTheGivenContactGroup() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group2", 3), "3abc", "3bcd", "3cde", "3def", "3efg", "3fgh"));
+        contacts.add(new Contact(new ContactId("user2", "group1", 4), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        Contact example = new Contact(new ContactId("user1", "", 0), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh");
+
+        when(mockedMap.values()).thenReturn(contacts);
+
+        ContactGroupId contactGroupId = new ContactGroupId("user1", "group3");
+
+        int expected = 0;
+
+        //When
+        List<Contact> resultList = contactRepository.findByContactGroupId(contactGroupId);
+        int result = resultList.size();
+
+        //Then
+        assertEquals(result, expected);
     }
 }

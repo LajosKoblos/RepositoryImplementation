@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class InMemoryUserRepository implements UserRepository {
 
     private final Lock LOCK = new ReentrantLock();
-    private Map<String, User> users = new HashMap<>();
+    private Map<String, User> users;
 
     public InMemoryUserRepository() {
         this(new HashMap<>());
@@ -61,18 +61,21 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public void delete(String s) throws EntityNotFoundException, IllegalArgumentException {
+    public void delete(String userName) throws EntityNotFoundException, IllegalArgumentException {
 
         try {
             LOCK.lock();
-            if (s == null || s.isEmpty()) {
+            if (userName == null || userName.isEmpty()) {
                 throw new IllegalArgumentException("Username missing!");
             }
 
-            System.out.println("Removing user " + s);
+            System.out.println("Removing user " + userName);
 
-            User removedUser = users.remove(s);
-            if (removedUser == null) throw new EntityNotFoundException(User.class, s);
+            if (!users.containsKey(userName)) {
+                throw new EntityNotFoundException(User.class, userName);
+            }
+            User removedUser = users.remove(userName);
+            if (removedUser == null) throw new EntityNotFoundException(User.class, userName);
 
         }
 
