@@ -36,7 +36,6 @@ public class InMemoryTokenRepository implements TokenRepository {
     }
 
     private Token createNewRecord(Token token){
-        //String tokenId = Integer.toString(currentId.getAndIncrement());
         String tokenId = UUID.randomUUID().toString();
         Token tokenWithId = new Token(token, tokenId);
         tokenStore.put(tokenId,tokenWithId);
