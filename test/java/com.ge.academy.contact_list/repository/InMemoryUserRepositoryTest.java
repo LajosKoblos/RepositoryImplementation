@@ -4,6 +4,7 @@ import com.ge.academy.contact_list.entity.UserRole;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.*;
 
@@ -34,17 +35,16 @@ public class InMemoryUserRepositoryTest {
         user1 = new User("user1", "123456", UserRole.USER);
         user2 = new User("user2", "1234567", UserRole.USER);
         userMap = new HashMap<>();
-        userMap.put(admin.getUserName(), admin);
-        userMap.put(user1.getUserName(), user1);
-        userMap.put(user2.getUserName(), user2);
+
         inMemoryUserRepository = new InMemoryUserRepository(userMap);
+        userMap = mock(HashMap.class);
     }
 
     @Test
     public void findAllShouldReturnAllElementsOfInternalMap() {
         //Given data set in setUp() method
 
-        userMap = mock(HashMap.class);
+
 
         List<User>returnedCollection = Arrays.asList(admin, user1, user2);
 
@@ -63,7 +63,6 @@ public class InMemoryUserRepositoryTest {
     public void findOneShouldReturnTheElementOfInternalMapWithGet() {
         //Given data set in setUp() method
 
-        userMap = mock(HashMap.class);
         User gerzson = new User("Gerzson", "valami", UserRole.USER);
 
         when(userMap.get("Gerzson")).thenReturn(gerzson);
@@ -84,7 +83,6 @@ public class InMemoryUserRepositoryTest {
 
         User origUser = new User("user3", "pipacs", UserRole.ADMIN);
         User newUser = new User("user3", "1234568", UserRole.USER);
-        userMap = mock(HashMap.class);
 
         when(userMap.put("user3", newUser))
                 .thenReturn(origUser);
@@ -102,8 +100,7 @@ public class InMemoryUserRepositoryTest {
     public void saveShouldReturnWithTheSavedUser() {
         //Given data set in setUp() method
 
-        User newUser = new User("user3", "1234568", UserRole.USER);
-        userMap = mock(HashMap.class);
+        User newUser = new User("user3", "1234568", UserRole.USER);;
 
         inMemoryUserRepository = new InMemoryUserRepository(userMap);
 
@@ -119,7 +116,6 @@ public class InMemoryUserRepositoryTest {
         //Given data set in setUp() method
 
         User newUser = new User("user3", "1234568", UserRole.USER);
-        userMap = mock(HashMap.class);
 
         inMemoryUserRepository = new InMemoryUserRepository(userMap);
 
@@ -130,11 +126,153 @@ public class InMemoryUserRepositoryTest {
         assertNotSame(newUser, savedUser);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenUserNameIsNull() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User(null, "1234568", UserRole.USER);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenUserNameIsEmpty() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User("", "1234568", UserRole.USER);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenPasswordIsNull() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User("Valaki", null, UserRole.USER);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenPasswordIsEmpty() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User("Valaki", "", UserRole.USER);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deleteShouldThrowIllegalArgumentExceptionWhenParameterIsEmpty() {
+        //Given data set in setUp() method
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.delete("");
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deleteShouldThrowIllegalArgumentExceptionWhenParameterIsNull() {
+        //Given data set in setUp() method
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.delete(null);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findOneShouldThrowIllegalArgumentExceptionWhenParameterIsNull() {
+        //Given data set in setUp() method
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.findOne(null);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findOneShouldThrowIllegalArgumentExceptionWhenParameterIsEmpty() {
+        //Given data set in setUp() method
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.findOne("");
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
     @Test
     public void deleteShouldRemoveUserFromMap() {
         //Given data set in setUp() method
-
-        userMap = mock(HashMap.class);
 
         when(userMap.remove("admin"))
                 .thenReturn(admin);
@@ -152,8 +290,6 @@ public class InMemoryUserRepositoryTest {
     public void deleteShouldThrowEntityNotFoundExceptionWhenEntityIsNotInMap() {
         //Given
 
-        userMap = mock(HashMap.class);
-
         try {
             when(userMap.remove("admin")).thenReturn(null);
 
@@ -167,6 +303,5 @@ public class InMemoryUserRepositoryTest {
             verify(userMap).remove("admin");
         }
     }
-
 
 }

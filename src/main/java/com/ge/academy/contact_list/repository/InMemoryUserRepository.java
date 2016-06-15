@@ -20,11 +20,11 @@ public class InMemoryUserRepository implements UserRepository {
 
     public InMemoryUserRepository() {
         this(new HashMap<>());
+        seed();
     }
 
     public InMemoryUserRepository(Map<String, User> users) {
         this.users = users;
-        seed();
     }
 
     private void seed() {
@@ -32,10 +32,18 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User save(User user) throws EntityNotFoundException {
+    public User save(User user) throws EntityNotFoundException, IllegalArgumentException {
         User thisUser = new User(user);
         try {
             LOCK.lock();
+
+            if (thisUser.getUserName() == null || thisUser.getUserName().isEmpty()) {
+                throw new IllegalArgumentException("Username missing!");
+            }
+
+            if (thisUser.getPassword() == null || thisUser.getPassword().isEmpty()){
+                throw new IllegalArgumentException("Password missing!");
+            }
 //      Can be a User update
             if (users.containsKey(thisUser.getUserName()))
                 System.out.println("User " + thisUser.getUserName() + " updated!");
@@ -53,10 +61,14 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public void delete(String s) throws EntityNotFoundException {
+    public void delete(String s) throws EntityNotFoundException, IllegalArgumentException {
 
         try {
             LOCK.lock();
+            if (s == null || s.isEmpty()) {
+                throw new IllegalArgumentException("Username missing!");
+            }
+
             System.out.println("Removing user " + s);
 
             User removedUser = users.remove(s);
@@ -71,9 +83,13 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User findOne(String s) throws EntityNotFoundException {
+    public User findOne(String s) throws EntityNotFoundException, IllegalArgumentException {
         try {
             LOCK.lock();
+
+            if (s == null || s.isEmpty()) {
+                throw new IllegalArgumentException("Username missing!");
+            }
 
             System.out.println("Finding user " + s);
 
@@ -90,9 +106,10 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public List<User> findAll() throws EntityNotFoundException {
+    public List<User> findAll() throws EntityNotFoundException, IllegalArgumentException {
         try {
             LOCK.lock();
+
             System.out.println("Finding all users...");
 
             return users.values().stream().map(User::new).collect(Collectors.toList());
