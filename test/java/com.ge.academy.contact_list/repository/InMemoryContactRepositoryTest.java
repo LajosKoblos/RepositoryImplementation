@@ -195,17 +195,39 @@ public class InMemoryContactRepositoryTest {
     }
 
     @Test
-    public void findAllShouldReturnTheListOfContacts() {
+    public void findAllShouldReturnTwoContactsWhenTwoContactInTheRepository() {
         //Given
         List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+        contacts.add(new Contact(new ContactId("user1", "group1", 2), "2abc", "2bcd", "2cde", "2def", "2efg", "2fgh"));
 
+        when(mockedMap.size()).thenReturn(contacts.size());
         when(mockedMap.values()).thenReturn(contacts);
 
         //When
-        List<Contact> expected = contactRepository.findAll();
+        List<Contact> result = contactRepository.findAll();
 
         //Then
-        assertEquals(contacts, expected);
+        assertEquals(contacts, result);
+    }
+
+    @Test
+    public void findAllShouldReturnWithDifferentReferenceOfTheContacts() {
+        //Given
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(new Contact(new ContactId("user1", "group1", 1), "1abc", "1bcd", "1cde", "1def", "1efg", "1fgh"));
+
+        when(mockedMap.size()).thenReturn(contacts.size());
+        when(mockedMap.values()).thenReturn(contacts);
+
+        Contact expected = contacts.get(0);
+
+        //When
+        List<Contact> resultList = contactRepository.findAll();
+        Contact result = resultList.get(0);
+
+        //Then
+        assertNotSame(expected, result);
     }
 
     @Test

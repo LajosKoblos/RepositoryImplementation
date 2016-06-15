@@ -70,9 +70,15 @@ public class InMemoryContactRepository implements ContactRepository {
 
     @Override
     public List<Contact> findAll() {
-        Contact[] contactsArray = new Contact[contacts.size()];
-        contacts.values().toArray(contactsArray);
-        return Arrays.asList(contactsArray);
+        List<Contact> contactsList = new ArrayList<>();
+        Contact[] originalContacts = new Contact[contacts.size()];
+        contacts.values().toArray(originalContacts);
+
+        for (Contact c:originalContacts) {
+            contactsList.add(new Contact(c));
+        }
+
+        return contactsList;
     }
 
     @Override
