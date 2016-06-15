@@ -31,7 +31,7 @@ public class InMemoryContactRepository implements ContactRepository {
     }
 
     @Override
-    public Contact save(Contact contact) throws EntityNotFoundException {
+    public Contact save(Contact contact) throws EntityNotFoundException, IllegalArgumentException {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
 
