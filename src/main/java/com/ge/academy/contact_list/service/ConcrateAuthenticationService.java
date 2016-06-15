@@ -44,8 +44,7 @@ public class ConcrateAuthenticationService implements AuthenticationService {
                 throw new AuthenticationFailedException();
             }else{
                 Token t = new Token(null,user,user.getRole(),LocalDateTime.now().plusHours(2));
-                inMemoryTokenRepository.save(t);
-                return t;
+                return inMemoryTokenRepository.save(t);
             }
         } catch (EntityNotFoundException e) {
             throw new AuthenticationFailedException();
