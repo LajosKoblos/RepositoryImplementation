@@ -14,7 +14,6 @@ import java.util.Map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.*;
 
 /**
  * Created by 212564432 on 6/14/2016.
