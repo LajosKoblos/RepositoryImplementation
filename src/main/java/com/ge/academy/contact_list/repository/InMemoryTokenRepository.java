@@ -5,8 +5,10 @@ import com.ge.academy.contact_list.entity.UserRole;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.rmi.server.UID;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,7 +36,8 @@ public class InMemoryTokenRepository implements TokenRepository {
     }
 
     private Token createNewRecord(Token token){
-        String tokenId = Integer.toString(currentId.getAndIncrement());
+        //String tokenId = Integer.toString(currentId.getAndIncrement());
+        String tokenId = UUID.randomUUID().toString();
         Token tokenWithId = new Token(token, tokenId);
         tokenStore.put(tokenId,tokenWithId);
         return tokenWithId;
