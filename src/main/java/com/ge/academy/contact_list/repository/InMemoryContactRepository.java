@@ -86,15 +86,15 @@ public class InMemoryContactRepository implements ContactRepository {
         List<Contact> matched = new ArrayList<>();
 
         for (Contact c : contacts.values()) {
-            if (!c.getId().getUserName().equals(contact.getId().getUserName())) {
+            if (c.getId() == null || contact.getId() == null || !c.getId().getUserName().equals(contact.getId().getUserName())) {
                 continue;
             }
-            if ((c.getFirstName() != null && c.getFirstName().toLowerCase().contains(contact.getFirstName().toLowerCase())) ||
-                    (c.getHomeEmail() != null && c.getHomeEmail().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
-                    (c.getJobTitle() != null && c.getJobTitle().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
-                    (c.getLastName() != null && c.getLastName().toLowerCase().contains(contact.getLastName().toLowerCase())) ||
-                    (c.getNickName() != null && c.getNickName().toLowerCase().contains(contact.getNickName().toLowerCase())) ||
-                    (c.getWorkEmail() != null && c.getWorkEmail().toLowerCase().contains(contact.getWorkEmail().toLowerCase()))) {
+            if ((c.getFirstName() != null && contact.getFirstName() != null && c.getFirstName().toLowerCase().contains(contact.getFirstName().toLowerCase())) ||
+                    (c.getHomeEmail() != null && contact.getHomeEmail() != null && c.getHomeEmail().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
+                    (c.getJobTitle() != null && contact.getJobTitle() != null && c.getJobTitle().toLowerCase().contains(contact.getHomeEmail().toLowerCase())) ||
+                    (c.getLastName() != null && contact.getLastName() != null && c.getLastName().toLowerCase().contains(contact.getLastName().toLowerCase())) ||
+                    (c.getNickName() != null && contact.getNickName() != null && c.getNickName().toLowerCase().contains(contact.getNickName().toLowerCase())) ||
+                    (c.getWorkEmail() != null && contact.getWorkEmail() != null && c.getWorkEmail().toLowerCase().contains(contact.getWorkEmail().toLowerCase()))) {
                 matched.add(new Contact(c));
             }
         }
