@@ -32,6 +32,11 @@ public class InMemoryContactRepository implements ContactRepository {
         this.contacts = contacts;
     }
 
+    public String concatenateExceptionListElements(){
+        String joined = String.join(",",exceptionList);
+        return joined;
+    }
+
     @Override
     public Contact save(Contact contact) throws EntityNotFoundException, IllegalArgumentException {
         Contact managed = new Contact(contact);
@@ -44,8 +49,8 @@ public class InMemoryContactRepository implements ContactRepository {
                 exceptionList.add("userName is empty in ContactId");
             }
 
-            if (!exceptionList.isEmpty()) {
-                throw new IllegalArgumentException(exceptionList.toString());
+            if (!exceptionList.isEmpty()){
+                throw new IllegalArgumentException(concatenateExceptionListElements());
             }
 
             if (managedId.getContactId() == 0L) {

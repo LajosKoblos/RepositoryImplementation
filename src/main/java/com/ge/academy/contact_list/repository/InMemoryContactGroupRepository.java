@@ -26,6 +26,11 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
         this.contactGroups = contactGroups;
     }
 
+    public String concatenateExceptionListElements(){
+        String joined = String.join(",",exceptionList);
+        return joined;
+    }
+
     @Override
     public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException, IllegalArgumentException {
 
@@ -47,6 +52,10 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
 
         if (contactGroup.getId().getUserName().isEmpty()){
             exceptionList.add("id.username is empty");
+        }
+
+        if (!exceptionList.isEmpty()){
+            throw new IllegalArgumentException(concatenateExceptionListElements());
         }
 
         contactGroups.put(contactGroup.getId(), contactGroup);

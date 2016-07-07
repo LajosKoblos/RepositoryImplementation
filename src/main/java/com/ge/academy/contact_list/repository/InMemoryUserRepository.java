@@ -59,7 +59,6 @@ public class InMemoryUserRepository implements UserRepository {
             }
 
             if (!exceptionList.isEmpty()){
-                System.out.println(concatenateExceptionListElements());
                 throw new IllegalArgumentException(concatenateExceptionListElements());
             }
 
