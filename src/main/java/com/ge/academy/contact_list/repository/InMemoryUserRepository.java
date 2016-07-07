@@ -2,11 +2,8 @@ package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.User;
 import com.ge.academy.contact_list.entity.UserRole;
-import com.sun.deploy.util.StringUtils;
 import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +34,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     public String concatenateExceptionListElements(){
-        String joined = StringUtils.join(exceptionList,",");
+        String joined = String.join(",",exceptionList);
         return joined;
     }
 
@@ -62,6 +59,7 @@ public class InMemoryUserRepository implements UserRepository {
             }
 
             if (!exceptionList.isEmpty()){
+                System.out.println(concatenateExceptionListElements());
                 throw new IllegalArgumentException(concatenateExceptionListElements());
             }
 
