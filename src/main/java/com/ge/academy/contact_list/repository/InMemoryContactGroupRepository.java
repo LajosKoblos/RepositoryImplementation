@@ -3,13 +3,14 @@ package com.ge.academy.contact_list.repository;
 import com.ge.academy.contact_list.entity.ContactGroup;
 import com.ge.academy.contact_list.entity.ContactGroupId;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
+import com.ge.academy.contact_list.exception.ValidationException;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Repository
@@ -26,37 +27,21 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
         this.contactGroups = contactGroups;
     }
 
-    public String concatenateExceptionListElements(){
-        String joined = String.join(",",exceptionList);
-        return joined;
-    }
-
     @Override
-    public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException, IllegalArgumentException {
+    public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException, ValidationException {
 
-        if (contactGroup.getId() == null){
-            exceptionList.add("contactgroupId is null");
-        }
+        // Error handling
+        Map<String, ArrayList<String>> errors = new HashMap<>();
+        errors.put("name", new ArrayList<>());
+        errors.put("displayName", new ArrayList<>());
 
-        if (contactGroup.getId().getContactGroupName() == null){
-            exceptionList.add("id.contactGroupName is missing");
-        }
+        if (contactGroup.getName() == null || contactGroup.getName().isEmpty()) errors.get("name").add("This field is required.");
+        if (contactGroup.getDisplayName() == null || contactGroup.getDisplayName().isEmpty()) errors.get("displayName").add("This field is required.");
 
-        if (contactGroup.getId().getContactGroupName().equals("")){
-            exceptionList.add("id.contactGroupName is emptyString");
+        for (Map.Entry<String, ArrayList<String>> entry : errors.entrySet()) {
+            if (entry.getValue().size() != 0) throw new ValidationException(errors);
         }
-
-        if (contactGroup.getId().getUserName() == null){
-            exceptionList.add("id.username is null");
-        }
-
-        if (contactGroup.getId().getUserName().isEmpty()){
-            exceptionList.add("id.username is empty");
-        }
-
-        if (!exceptionList.isEmpty()){
-            throw new IllegalArgumentException(concatenateExceptionListElements());
-        }
+        // End of error handling
 
         contactGroups.put(contactGroup.getId(), contactGroup);
         return contactGroup;

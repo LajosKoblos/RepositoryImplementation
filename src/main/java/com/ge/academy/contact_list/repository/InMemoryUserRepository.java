@@ -2,6 +2,7 @@ package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.User;
 import com.ge.academy.contact_list.entity.UserRole;
+import com.ge.academy.contact_list.exception.ValidationException;
 import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 import java.util.ArrayList;
@@ -33,34 +34,27 @@ public class InMemoryUserRepository implements UserRepository {
         users.put("Admin", new User("Admin", "Alma1234", UserRole.ADMIN));
     }
 
-    public String concatenateExceptionListElements(){
-        String joined = String.join(",",exceptionList);
-        return joined;
-    }
-
-
     @Override
-    public User save(User user) throws EntityNotFoundException, IllegalArgumentException {
+    public User save(User user) throws EntityNotFoundException, ValidationException {
         User thisUser = new User(user);
+
+        // Error handling
+        Map<String, ArrayList<String>> errors = new HashMap<>();
+        errors.put("userName", new ArrayList<>());
+        errors.put("password", new ArrayList<>());
+		errors.put("role", new ArrayList<>());
+
+        if (thisUser.getUserName() == null || thisUser.getUserName().isEmpty()) errors.get("userName").add("This field is required.");
+        if (thisUser.getPassword() == null ||thisUser.getPassword().isEmpty()) errors.get("password").add("This field is required.");
+        if (thisUser.getRole() == null) errors.get("role").add("Users must have a role");
+
+        for (Map.Entry<String, ArrayList<String>> entry : errors.entrySet()) {
+            if (entry.getValue().size() != 0) throw new ValidationException(errors);
+        }
+        // End of error handling
 
         try {
             LOCK.lock();
-
-            if (thisUser.getUserName() == null || thisUser.getUserName().isEmpty()) {
-                exceptionList.add("Username missing");
-            }
-
-            if (thisUser.getPassword() == null || thisUser.getPassword().isEmpty()){
-                exceptionList.add("Password missing");
-            }
-
-            if (thisUser.getRole() == null || thisUser.getRole().toString().isEmpty()){
-                exceptionList.add("User role missing!");
-            }
-
-            if (!exceptionList.isEmpty()){
-                throw new IllegalArgumentException(concatenateExceptionListElements());
-            }
 
 //      Can be a User update
             if (users.containsKey(thisUser.getUserName()))
@@ -75,20 +69,14 @@ public class InMemoryUserRepository implements UserRepository {
 
         finally {
             LOCK.unlock();
-            exceptionList.clear();
         }
     }
 
     @Override
-    public void delete(String userName) throws EntityNotFoundException, IllegalArgumentException {
+    public void delete(String userName) throws EntityNotFoundException {
 
         try {
             LOCK.lock();
-            if (userName == null || userName.isEmpty()) {
-                throw new IllegalArgumentException("Username missing!");
-            }
-
-            System.out.println("Removing user " + userName);
 
             if (!users.containsKey(userName)) {
                 throw new EntityNotFoundException(User.class, userName);
@@ -105,15 +93,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User findOne(String s) throws EntityNotFoundException, IllegalArgumentException {
+    public User findOne(String s) throws EntityNotFoundException {
         try {
             LOCK.lock();
-
-            if (s == null || s.isEmpty()) {
-                throw new IllegalArgumentException("Username missing!");
-            }
-
-            System.out.println("Finding user " + s);
 
             User thisUser = users.get(s);
 
@@ -128,11 +110,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public List<User> findAll() throws EntityNotFoundException, IllegalArgumentException {
+    public List<User> findAll() throws EntityNotFoundException {
         try {
             LOCK.lock();
-
-            System.out.println("Finding all users...");
 
             return users.values().stream().map(User::new).collect(Collectors.toList());
         }

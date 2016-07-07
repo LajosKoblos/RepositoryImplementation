@@ -4,23 +4,20 @@ import com.ge.academy.contact_list.entity.Contact;
 import com.ge.academy.contact_list.entity.ContactGroupId;
 import com.ge.academy.contact_list.entity.ContactId;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ge.academy.contact_list.exception.ValidationException;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryContactRepository implements ContactRepository {
     private IdProvider idProvider;
     private ConcurrentMap<ContactId, Contact> contacts;
-
-    List<String> exceptionList = new ArrayList<String>();
 
     public InMemoryContactRepository() {
         this.idProvider = new AtomicLongIdProvider();
@@ -32,38 +29,31 @@ public class InMemoryContactRepository implements ContactRepository {
         this.contacts = contacts;
     }
 
-    public String concatenateExceptionListElements(){
-        String joined = String.join(",",exceptionList);
-        return joined;
-    }
-
     @Override
-    public Contact save(Contact contact) throws EntityNotFoundException, IllegalArgumentException {
+    public Contact save(Contact contact) throws EntityNotFoundException, ValidationException {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
-        try {
-            if (managedId.getContactGroupName().isEmpty()) {
-                exceptionList.add("contactGroupName is empty in ContactId");
-            }
-            if (managedId.getUserName().isEmpty()) {
-                exceptionList.add("userName is empty in ContactId");
-            }
 
-            if (!exceptionList.isEmpty()){
-                throw new IllegalArgumentException(concatenateExceptionListElements());
-            }
+		// Error handling
+		Map<String, ArrayList<String>> errors = new HashMap<>();
+		errors.put("firstName", new ArrayList<>());
+		errors.put("lastName", new ArrayList<>());
 
-            if (managedId.getContactId() == 0L) {
-                managedId.setContactId(idProvider.getNewId());
-            } else if (contacts.get(managedId) == null) {
-                throw new EntityNotFoundException(Contact.class, managed.getId());
-            }
-            contacts.put(managedId, managed);
-            return new Contact(managed);
-        } finally {
-            exceptionList.clear();
-        }
+		if (managed.getFirstName() == null || managed.getFirstName().isEmpty()) errors.get("firstName").add("This field is required.");
+		if (managed.getLastName() == null || managed.getLastName().isEmpty()) errors.get("lastName").add("This field is required.");
 
+		for (Map.Entry<String, ArrayList<String>> entry : errors.entrySet()) {
+			if (entry.getValue().size() != 0) throw new ValidationException(errors);
+		}
+		// End of error handling
+
+		if (managedId.getContactId() == 0L) {
+			managedId.setContactId(idProvider.getNewId());
+		} else if (contacts.get(managedId) == null) {
+			throw new EntityNotFoundException(Contact.class, managed.getId());
+		}
+		contacts.put(managedId, managed);
+		return new Contact(managed);
     }
 
     @Override
