@@ -332,4 +332,42 @@ public class InMemoryUserRepositoryTest {
         }
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenUserNameAndPasswordIsNull() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User(null, null, UserRole.USER);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveShouldThrowIllegalArgumentExceptionWhenUserNameAndPasswordAndUserRoleIsNull() {
+        //Given data set in setUp() method
+
+        User newUserWithoutName = new User(null, null, null);
+
+        try {
+
+            inMemoryUserRepository = new InMemoryUserRepository(userMap);
+
+            //When
+            inMemoryUserRepository.save(newUserWithoutName);
+
+            //Then
+        } finally {
+            verify(userMap, Mockito.never()).put(any(),any());
+        }
+    }
 }

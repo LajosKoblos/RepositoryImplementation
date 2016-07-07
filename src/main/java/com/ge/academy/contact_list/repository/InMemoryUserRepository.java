@@ -5,6 +5,8 @@ import com.ge.academy.contact_list.entity.UserRole;
 import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,8 @@ public class InMemoryUserRepository implements UserRepository {
 
     private final Lock LOCK = new ReentrantLock();
     private Map<String, User> users;
+
+    List exceptionList = new ArrayList();
 
     public InMemoryUserRepository() {
         this(new HashMap<>());
@@ -34,21 +38,26 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User save(User user) throws EntityNotFoundException, IllegalArgumentException {
         User thisUser = new User(user);
+
         try {
             LOCK.lock();
 
             if (thisUser.getUserName() == null || thisUser.getUserName().isEmpty()) {
-                throw new IllegalArgumentException("Username missing!");
+                exceptionList.add("Username missing");
             }
 
             if (thisUser.getPassword() == null || thisUser.getPassword().isEmpty()){
-                throw new IllegalArgumentException("Password missing!");
+                exceptionList.add("Password missing");
             }
 
             if (thisUser.getRole() == null || thisUser.getRole().toString().isEmpty()){
-                throw new IllegalArgumentException("User role missing!");
+                exceptionList.add("User role missing!");
             }
 
+            if (!exceptionList.isEmpty()){
+                System.out.println(exceptionList.toString());
+                throw new IllegalArgumentException(exceptionList.toString());
+            }
 
 //      Can be a User update
             if (users.containsKey(thisUser.getUserName()))
@@ -63,6 +72,7 @@ public class InMemoryUserRepository implements UserRepository {
 
         finally {
             LOCK.unlock();
+            exceptionList.clear();
         }
     }
 
