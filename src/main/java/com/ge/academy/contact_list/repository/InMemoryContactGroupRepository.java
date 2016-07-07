@@ -20,6 +20,7 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
     public InMemoryContactGroupRepository() {
         contactGroups = new ConcurrentHashMap<>();
     }
+    List<String> exceptionList = new ArrayList<String>();
 
     public InMemoryContactGroupRepository(Map<ContactGroupId, ContactGroup> contactGroups) {
         this.contactGroups = contactGroups;
@@ -29,25 +30,24 @@ public class InMemoryContactGroupRepository implements ContactGroupRepository {
     public ContactGroup save(ContactGroup contactGroup) throws EntityNotFoundException, IllegalArgumentException {
 
         if (contactGroup.getId() == null){
-            throw new IllegalArgumentException("contactgroupId is null");
+            exceptionList.add("contactgroupId is null");
         }
 
         if (contactGroup.getId().getContactGroupName() == null){
-            throw new IllegalArgumentException("id.contactGroupName is missing");
+            exceptionList.add("id.contactGroupName is missing");
         }
 
         if (contactGroup.getId().getContactGroupName().equals("")){
-            throw new IllegalArgumentException("id.contactGroupName is emptyString");
+            exceptionList.add("id.contactGroupName is emptyString");
         }
 
         if (contactGroup.getId().getUserName() == null){
-            throw new IllegalArgumentException("id.username is null");
+            exceptionList.add("id.username is null");
         }
 
         if (contactGroup.getId().getUserName().isEmpty()){
-            throw new IllegalArgumentException("id.username is empty");
+            exceptionList.add("id.username is empty");
         }
-
 
         contactGroups.put(contactGroup.getId(), contactGroup);
         return contactGroup;

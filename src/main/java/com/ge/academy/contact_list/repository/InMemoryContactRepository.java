@@ -20,6 +20,8 @@ public class InMemoryContactRepository implements ContactRepository {
     private IdProvider idProvider;
     private ConcurrentMap<ContactId, Contact> contacts;
 
+    List<String> exceptionList = new ArrayList<String>();
+
     public InMemoryContactRepository() {
         this.idProvider = new AtomicLongIdProvider();
         this.contacts = new ConcurrentHashMap<ContactId, Contact>();
@@ -34,21 +36,29 @@ public class InMemoryContactRepository implements ContactRepository {
     public Contact save(Contact contact) throws EntityNotFoundException, IllegalArgumentException {
         Contact managed = new Contact(contact);
         ContactId managedId = managed.getId();
+        try {
+            if (managedId.getContactGroupName().isEmpty()) {
+                exceptionList.add("contactGroupName is empty in ContactId");
+            }
+            if (managedId.getUserName().isEmpty()) {
+                exceptionList.add("userName is empty in ContactId");
+            }
 
-        if (managedId.getContactGroupName().isEmpty()) {
-            throw new IllegalArgumentException("contactGroupName is empty in ContactId");
-        }
-        if (managedId.getUserName().isEmpty()) {
-            throw new IllegalArgumentException("userName is empty in ContactId");
+            if (!exceptionList.isEmpty()) {
+                throw new IllegalArgumentException(exceptionList.toString());
+            }
+
+            if (managedId.getContactId() == 0L) {
+                managedId.setContactId(idProvider.getNewId());
+            } else if (contacts.get(managedId) == null) {
+                throw new EntityNotFoundException(Contact.class, managed.getId());
+            }
+            contacts.put(managedId, managed);
+            return new Contact(managed);
+        } finally {
+            exceptionList.clear();
         }
 
-        if (managedId.getContactId() == 0L) {
-            managedId.setContactId(idProvider.getNewId());
-        } else if (contacts.get(managedId) == null) {
-            throw new EntityNotFoundException(Contact.class, managed.getId());
-        }
-        contacts.put(managedId, managed);
-        return new Contact(managed);
     }
 
     @Override
@@ -74,7 +84,7 @@ public class InMemoryContactRepository implements ContactRepository {
         Contact[] originalContacts = new Contact[contacts.size()];
         contacts.values().toArray(originalContacts);
 
-        for (Contact c:originalContacts) {
+        for (Contact c : originalContacts) {
             contactsList.add(new Contact(c));
         }
 

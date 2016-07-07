@@ -2,6 +2,7 @@ package com.ge.academy.contact_list.repository;
 
 import com.ge.academy.contact_list.entity.User;
 import com.ge.academy.contact_list.entity.UserRole;
+import com.sun.deploy.util.StringUtils;
 import org.springframework.stereotype.Repository;
 import com.ge.academy.contact_list.exception.EntityNotFoundException;
 
@@ -20,7 +21,7 @@ public class InMemoryUserRepository implements UserRepository {
     private final Lock LOCK = new ReentrantLock();
     private Map<String, User> users;
 
-    List exceptionList = new ArrayList();
+    List<String> exceptionList = new ArrayList<String>();
 
     public InMemoryUserRepository() {
         this(new HashMap<>());
@@ -34,6 +35,12 @@ public class InMemoryUserRepository implements UserRepository {
     private void seed() {
         users.put("Admin", new User("Admin", "Alma1234", UserRole.ADMIN));
     }
+
+    public String concatenateExceptionListElements(){
+        String joined = StringUtils.join(exceptionList,",");
+        return joined;
+    }
+
 
     @Override
     public User save(User user) throws EntityNotFoundException, IllegalArgumentException {
@@ -55,8 +62,7 @@ public class InMemoryUserRepository implements UserRepository {
             }
 
             if (!exceptionList.isEmpty()){
-                System.out.println(exceptionList.toString());
-                throw new IllegalArgumentException(exceptionList.toString());
+                throw new IllegalArgumentException(concatenateExceptionListElements());
             }
 
 //      Can be a User update
